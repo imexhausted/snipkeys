@@ -11,17 +11,26 @@
 #include <X11/XKBlib.h>
 #include <X11/extensions/XTest.h>
 
-void UsendKey(Display *disp, KeyCode code){
-    XTestFakeKeyEvent(disp, code, True, 0);
-    XFlush(disp);
-    
-    XTestFakeKeyEvent(disp, code, False, 0);
-    XFlush(disp);
-    
-}
+#include "Config.hpp"
+#include "KeyBuffer.hpp"
+#include "./clip/clip.h"
 
 int main(int argc, char * argv[])
 {
+    std::string confPath = "./settings.config";
+    for (int i = 1; i < argc; i++){
+        if (argv[i] == "config"){
+            confPath = argv[i + 1];
+            if (argc < i+1){
+                std::cout << "No config path has been provided" << '\n';
+            }
+        }
+        
+    }
+
+    UsrKeyBuffer keyBuff;
+    Config::Config config("./settings.config");
+
     const char * hostname    = ":0";
  
 
@@ -69,7 +78,7 @@ int main(int argc, char * argv[])
                     if (NoSymbol == s) continue;
                     char *str = XKeysymToString(s);
                     if (NULL == str) continue;
- 
+
                     std::cout << (cookie->evtype == XI_RawKeyPress ? "+" : "-") << str << " " << std::flush;
                     //UsendKey(disp, ev->detail);
                     break;

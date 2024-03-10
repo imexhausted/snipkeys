@@ -5,7 +5,7 @@
 #include <vector>
 #include <array>
 
-enum ParseFlag {CONFIG, KEYCODES};
+namespace Config{
 
 struct Pair{
     std::string key;
@@ -19,6 +19,10 @@ struct Key{
     std::string key;
 };
 
+char* keyConf[][2] = {
+    {"slash", "/"}
+    };
+
 class Config {
     public:
         std::vector<Pair> values;
@@ -26,7 +30,7 @@ class Config {
         std::ifstream file;
         int triggerMaxSize = 0;
 
-        Config(std::string confPath, std::string keysPath){
+        Config(std::string confPath){
             parse(confPath);
         };
 
@@ -79,3 +83,5 @@ class Config {
         }
 
 };
+
+}
