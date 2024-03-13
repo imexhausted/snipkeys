@@ -28,8 +28,10 @@ int main(int argc, char * argv[])
         
     }
 
-    UsrKeyBuffer keyBuff;
     Config::Config config("./settings.config");
+    std::cout << config.getValue("/he").key << " " << config.getValue("/he").triggerSize << std::endl;
+    std::cout << config.getValue("/he").value << " " << config.getValue("/he").valueSize << std::endl;
+    UsrKeyBuffer keyBuff(&config);
 
     const char * hostname    = ":0";
  
@@ -64,26 +66,53 @@ int main(int argc, char * argv[])
         XNextEvent(disp, &event);
  
         if (XGetEventData(disp, cookie) &&
-                cookie->type == GenericEvent) 
-        {
-            switch (cookie->evtype)
-            {
-                case XI_RawKeyRelease:
-                case XI_RawKeyPress: 
-                {
+                cookie->type == GenericEvent) {
+
+                    // bool eventType = (cookie->evtype == XI_RawKeyPress) ? true : false;
+                    if (cookie->evtype == XI_RawKeyRelease) continue; 
                     XIRawEvent *ev = (XIRawEvent*)cookie->data;
  
                     // Ask X what it calls that key
                     KeySym s = XkbKeycodeToKeysym(disp, ev->detail, 0, 0);
+
+                    switch (s){
+                        // case XK_Control_L:
+                        // case XK_Control_R:
+                        //     keyBuff.mod.Ctrl = eventType;
+                        //     break;
+                        // case XK_Alt_L:
+                        // case XK_Alt_R:
+                        //     keyBuff.mod.Alt = eventType;
+                        //     break;
+                        // case XK_Shift_L:
+                        // case XK_Shift_R:
+                        //     keyBuff.mod.Shift = eventType;
+                        //     break;
+                        case XK_slash:
+                            keyBuff.listen(true);
+                            break;
+                        // case XK_BackSpace:
+                        //     keyBuff.listen(false);
+                        //     break;
+                    }
+
                     if (NoSymbol == s) continue;
+                    std::cout << keyBuff.listening << std::endl;
+
+                    if (!keyBuff.listening) continue;
+                    
                     char *str = XKeysymToString(s);
                     if (NULL == str) continue;
+                    
+                    if (!keyBuff.kvlBuff(str)) {
+                        std::cout << keyBuff.keyValBuff << " " << keyBuff.keyValBuff.size() << std::endl;
+                        continue;}
+                    std::string pasteValue = config.getValue(keyBuff.keyValBuff).value;
+                    std::cout << pasteValue << '\n';
+                    keyBuff.clearBuff();
 
-                    std::cout << (cookie->evtype == XI_RawKeyPress ? "+" : "-") << str << " " << std::flush;
-                    //UsendKey(disp, ev->detail);
-                    break;
-                }
-            }
+                    // std::cout << (cookie->evtype == XI_RawKeyPress ? "+" : "-") << str << " " << std::flush;
+                    //UsendKey(disp, ev->detail);                
         }
     }
 }

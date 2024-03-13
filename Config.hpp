@@ -19,10 +19,6 @@ struct Key{
     std::string key;
 };
 
-char* keyConf[][2] = {
-    {"slash", "/"}
-    };
-
 class Config {
     public:
         std::vector<Pair> values;
@@ -52,8 +48,8 @@ class Config {
             Pair ret = {"Not found", "Not found", 0, 0};
             for (int i = 0; i < values.size(); i++){
                 if (values[i].key == key){
-                    ret = values[i];
-                    break;
+                    return values[i];
+                    //break;
                 }
             }
             return ret;

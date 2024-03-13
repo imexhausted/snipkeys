@@ -14,34 +14,60 @@ struct Modifiers{
 
 class UsrKeyBuffer{
     public:
-        std::vector<std::string> keyBuff;
-
+        std::vector<std::string> keyPressBuff;
+        std::string keyValBuff = "";
         Modifiers mod;
+        Config::Config* conf;
+        bool listening = false;
 
-        void setMod(char * option){
-            if (option == "Alt_L"){}
+
+        UsrKeyBuffer(Config::Config *configuration){
+            conf = configuration;
         }
 
         void remove(std::string key){
-            for (std::vector<std::string>::iterator i = keyBuff.begin(); i != keyBuff.end(); i++){
+            for (std::vector<std::string>::iterator i = keyPressBuff.begin(); i != keyPressBuff.end(); i++){
                 if (i->data() == key){
-                    keyBuff.erase(i);
+                    keyPressBuff.erase(i);
                 }
             }
         }
 
         bool checkRemove(std::string key){
-            for (std::vector<std::string>::iterator i = keyBuff.begin(); i != keyBuff.end(); i++){
+            for (std::vector<std::string>::iterator i = keyPressBuff.begin(); i != keyPressBuff.end(); i++){
                 if (i->data() == key){
-                    keyBuff.erase(i);
+                    keyPressBuff.erase(i);
                     return true;
                 }
             }
             return false;
         }
 
+        void listen(bool isListening){
+            listening = isListening;
+        }
+
+        bool kvlBuff(std::string val){
+            if (val == "slash") val = "/";
+            keyValBuff.append(val);
+            if (keyValBuff.size() > conf->triggerMaxSize) {
+                clearBuff();
+                listen(false);
+                return false;
+                }
+            if (conf->exist(keyValBuff)) {
+                listen(false);
+                return true;
+                }
+            return false;
+        }
+
+        void clearBuff(){
+            keyValBuff = "";
+        }
+
         void add(std::string key){
-            keyBuff.push_back(key);
+            keyPressBuff.push_back(key);
         }
 
         void delSeq(Display* disp, std::string seq){
