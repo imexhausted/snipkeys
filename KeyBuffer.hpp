@@ -6,11 +6,6 @@
 #include <X11/extensions/XTest.h>
 #include "./Config.hpp"
 
-struct Modifiers{
-    bool Ctrl = false;
-    bool Alt = false;
-    bool Shift = false;
-};
 
 struct operKeys{
     KeyCode backspace;
@@ -20,13 +15,10 @@ struct operKeys{
 
 class UsrKeyBuffer{
     public:
-        std::vector<std::string> keyPressBuff;
         std::string keyValBuff = "";
-        Modifiers mod;
         Config::Config* conf;
         bool listening = false;
         Display* disp;
-        KeyCode cbackspace;
         operKeys oper;
 
         UsrKeyBuffer(Config::Config *configuration, Display* display){
@@ -35,24 +27,6 @@ class UsrKeyBuffer{
             oper.backspace = XKeysymToKeycode(disp, XK_BackSpace);
             oper.ctrl = XKeysymToKeycode(disp, XK_Control_L);
             oper.vLetter = XKeysymToKeycode(disp, XK_v);
-        }
-
-        void remove(std::string key){
-            for (std::vector<std::string>::iterator i = keyPressBuff.begin(); i != keyPressBuff.end(); i++){
-                if (i->data() == key){
-                    keyPressBuff.erase(i);
-                }
-            }
-        }
-
-        bool checkRemove(std::string key){
-            for (std::vector<std::string>::iterator i = keyPressBuff.begin(); i != keyPressBuff.end(); i++){
-                if (i->data() == key){
-                    keyPressBuff.erase(i);
-                    return true;
-                }
-            }
-            return false;
         }
 
         void listen(bool isListening){
@@ -76,10 +50,6 @@ class UsrKeyBuffer{
 
         void clearBuff(){
             keyValBuff = "";
-        }
-
-        void add(std::string key){
-            keyPressBuff.push_back(key);
         }
 
         void delSeq(){
@@ -111,7 +81,4 @@ class UsrKeyBuffer{
         
         }
 
-        void nothing(){
-
-        }
 };
