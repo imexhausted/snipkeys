@@ -12,6 +12,12 @@ struct Modifiers{
     bool Shift = false;
 };
 
+struct operKeys{
+    KeyCode backspace;
+    KeyCode ctrl;
+    KeyCode vLetter;
+};
+
 class UsrKeyBuffer{
     public:
         std::vector<std::string> keyPressBuff;
@@ -19,10 +25,16 @@ class UsrKeyBuffer{
         Modifiers mod;
         Config::Config* conf;
         bool listening = false;
+        Display* disp;
+        KeyCode cbackspace;
+        operKeys oper;
 
-
-        UsrKeyBuffer(Config::Config *configuration){
+        UsrKeyBuffer(Config::Config *configuration, Display* display){
             conf = configuration;
+            disp = display;
+            oper.backspace = XKeysymToKeycode(disp, XK_BackSpace);
+            oper.ctrl = XKeysymToKeycode(disp, XK_Control_L);
+            oper.vLetter = XKeysymToKeycode(disp, XK_v);
         }
 
         void remove(std::string key){
@@ -70,14 +82,26 @@ class UsrKeyBuffer{
             keyPressBuff.push_back(key);
         }
 
-        void delSeq(Display* disp, std::string seq){
-            KeySym backspace = XK_BackSpace;
-            KeyCode cbackspace = XKeysymToKeycode(disp, backspace);
-            for (int i = 0; i < seq.size(); i++){
-                UsendKey(disp, backspace);
+        void delSeq(){
+            for (int i = 0; i < keyValBuff.size(); i++){
+                UsendKey(disp, oper.backspace);
             }
         }
 
+        void paste(){
+            XTestFakeKeyEvent(disp, oper.ctrl, True, 0);
+            XFlush(disp);
+
+            XTestFakeKeyEvent(disp, oper.vLetter, True, 0);
+            XFlush(disp);
+
+            XTestFakeKeyEvent(disp, oper.vLetter, False, 0);
+            XFlush(disp);  
+        
+            XTestFakeKeyEvent(disp, oper.ctrl, False, 0);
+            XFlush(disp);            
+        }
+    private:
         void UsendKey(Display *disp, KeyCode code){
             XTestFakeKeyEvent(disp, code, True, 0);
             XFlush(disp);
@@ -85,5 +109,9 @@ class UsrKeyBuffer{
             XTestFakeKeyEvent(disp, code, False, 0);
             XFlush(disp);
         
+        }
+
+        void nothing(){
+
         }
 };

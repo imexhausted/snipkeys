@@ -28,14 +28,7 @@ int main(int argc, char * argv[])
         
     }
 
-    Config::Config config("./settings.config");
-    std::cout << config.getValue("/he").key << " " << config.getValue("/he").triggerSize << std::endl;
-    std::cout << config.getValue("/he").value << " " << config.getValue("/he").valueSize << std::endl;
-    UsrKeyBuffer keyBuff(&config);
-
-    const char * hostname    = ":0";
- 
-
+     const char * hostname    = ":0";
     // Set up X
     Display * disp = XOpenDisplay(hostname);
     if (NULL == disp)
@@ -43,6 +36,15 @@ int main(int argc, char * argv[])
         std::cerr << "Cannot open X display: " << hostname << std::endl;
         exit(1);
     }
+
+    Config::Config config("./settings.config");
+    // std::cout << config.getValue("/he").key << " " << config.getValue("/he").triggerSize << std::endl;
+    // std::cout << config.getValue("/he").value << " " << config.getValue("/he").valueSize << std::endl;
+    UsrKeyBuffer keyBuff(&config, disp);
+
+
+ 
+
  
 
     // Register events
@@ -97,7 +99,7 @@ int main(int argc, char * argv[])
                     }
 
                     if (NoSymbol == s) continue;
-                    std::cout << keyBuff.listening << std::endl;
+                    // std::cout << keyBuff.listening << std::endl;
 
                     if (!keyBuff.listening) continue;
                     
@@ -105,10 +107,15 @@ int main(int argc, char * argv[])
                     if (NULL == str) continue;
                     
                     if (!keyBuff.kvlBuff(str)) {
-                        std::cout << keyBuff.keyValBuff << " " << keyBuff.keyValBuff.size() << std::endl;
+                        // std::cout << keyBuff.keyValBuff << " " << keyBuff.keyValBuff.size() << std::endl;
                         continue;}
+
                     std::string pasteValue = config.getValue(keyBuff.keyValBuff).value;
-                    std::cout << pasteValue << '\n';
+                    keyBuff.delSeq();
+                    clip::set_text(pasteValue);
+                    keyBuff.paste();
+                    
+                    //std::cout << pasteValue << '\n';
                     keyBuff.clearBuff();
 
                     // std::cout << (cookie->evtype == XI_RawKeyPress ? "+" : "-") << str << " " << std::flush;
